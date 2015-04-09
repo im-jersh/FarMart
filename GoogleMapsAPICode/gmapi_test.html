@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRfWel5stwSX72mYoLBYhhjMhXEFrAw8I">
+    </script>
+    <script type="text/javascript">
+    function initialize() {
+		//here are the coordinates from the excel sheet (y = lat, x = lon)
+		var martCoords = new google.maps.LatLng(39.0899426,-94.5802367);
+		
+		//this string literal object holds the required data for the generation of the map
+        var mapOptions = {
+          center: martCoords,
+          zoom: 10
+        };
+        //define the map that will inhabit the 'map-canvas' div
+		var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+		
+		//here is marker information	
+		var marker = new google.maps.Marker({
+			position: martCoords,
+			map: map,
+			title:"Badseed \"Funky\" Farmers' Market"
+		});	
+		
+		//here is the content string that is stored in the infoWindow
+		var contentString = '<div id="content">'+
+			'<div id="siteNotice">'+
+			'</div>'+
+			'<h3 id="firstHeading" class="firstHeading">"Badseed \"Funky\" Farmers Market"</h3>'+
+			'<div id="bodyContent">'+
+			'<p>1909 McGee St </br>Kansas City,  Missouri 64108</p>' +
+			'<p><a href="http://www.badseedfarm.com">http://www.badseedfarm.com</a></p>'+
+			'</div>'+
+			'</div>';
+		
+		//here is the info window that holds the content string that will display when the marker is clicked
+		var infowindow = new google.maps.InfoWindow({
+			content: contentString
+		});
+		
+		//here is the event that triggers window display on click	
+		google.maps.event.addListener(marker, 'click', function() {
+			infowindow.open(map,marker);
+		});	
+	}
+	//triggers map load when the HTML page has fully loaded
+	google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+<div id="map-canvas"></div>
+  </body>
+</html>
