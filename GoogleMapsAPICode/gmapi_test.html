@@ -9,6 +9,23 @@
     </script>
     <script type="text/javascript">
     function initialize() {
+		
+		function downloadUrl(url, callback) {
+		  var request = window.ActiveXObject ?
+			  new ActiveXObject('Microsoft.XMLHTTP') :
+			  new XMLHttpRequest;
+
+		  request.onreadystatechange = function() {
+			if (request.readyState == 4) {
+			  request.onreadystatechange = doNothing;
+			  callback(request.responseText, request.status);
+			}
+		  };
+
+		  request.open('GET', url, true);
+		  request.send(null);
+		}
+		
 		//here are the coordinates from the excel sheet (y = lat, x = lon)
 		var martCoords = new google.maps.LatLng(39.0899426,-94.5802367);
 		
