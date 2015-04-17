@@ -1,0 +1,49 @@
+<?php
+
+$search_by;
+			if(isset($_POST['search_by'])){
+				$search_by = $_POST['search_by'];
+				$userInput = htmlspecialchars($_POST['query_string']);
+				$userInput = $userInput."%";
+			if($_POST['search_by'] == "state"){
+				$result = pg_prepare($conn, "state", 'SELECT * FROM farmmarkets AS state WHERE state  ILIKE $1') or die("Prepare fail: ".pg_last_error());
+				$result = pg_execute($conn, "state",array($userInput)) or die("Query fail: ".pg_last_error());
+			}
+			else if($_POST['search_by'] == "city"){
+				$result = pg_prepare($conn, "city", 'SELECT * FROM farmmarkets AS city WHERE city ILIKE $1') or die("Prepare fail: ".pg_last_error());
+		        $result = pg_execute($conn, "city",array($userInput)) or die("Query fail: ".pg_last_error());
+			}
+			else if($_POST['search_by'] == "zip"){
+				$result = pg_prepare($conn, "zip", 'SELECT * FROM farmmarkets AS zip WHERE zip ILIKE $1') or die("Prepare fail: ".pg_last_error());
+		        $result = pg_execute($conn, "zip",array($userInput)) or die("Query fail: ".pg_last_error());
+
+			}
+			else if($_POST['search_by'] == "county"){
+				$result = pg_prepare($conn, "county", 'SELECT * FROM farmmarkets AS county WHERE county ILIKE $1') or die("Prepare fail: ".pg_last_error());
+		        $result = pg_execute($conn, "county",array($userInput)) or die("Query fail: ".pg_last_error());
+			}	
+			else if($_POST['search_by'] == "fmid"){
+				$result = pg_prepare($conn, "fmid", 'SELECT * FROM farmmarkets AS fmid WHERE city ILIKE $1') or die("Prepare fail: ".pg_last_error());
+		        $result = pg_execute($conn, "fmid",array($userInput)) or die("Query fail: ".pg_last_error());
+			}
+				echo "<br>There where ".pg_num_rows($result)." rows returned<br><br>\n";
+					echo "<table border='1'>";
+					echo "<tr>";
+					echo "<th width=\"135\">Action</th>";
+//Counting the number to make for the header
+				$numCount = pg_num_fields($result);
+				for($i = 0;$i < $numCount; $i++){
+					$fieldName = pg_field_name($result, $i);
+					echo "<th width=\"100\">" . $fieldName . "</th>\n";
+				}
+					echo "</tr>";
+//Putting results into the table
+				while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+					echo "\t<tr>\n";
+				 if($search_by == "city"){
+				 	$pkey = "id";//Need this pkey
+				}
+				else {
+				 	$pkey = "country_code";//Need this pkey as well
+				}
+					echo '<td>';
