@@ -1,0 +1,55 @@
+<?php
+require("queryPlan.php");
+require ("latlong.php");
+
+// Get parameters from URL
+$center_lat = $_GET["latitude"];
+$center_lng = $_GET["longitude"];
+$radius = $_GET["radius"];
+
+// Start XML file, create parent node
+$dom = new DOMDocument("1.0");
+$node = $dom->createElement("markers");
+$parnode = $dom->appendChild($node);
+
+// Opens a connection to a mySQL server
+$connection=mysql_connect (localhost, $username, $password);
+if (!$connection) {
+  die("Not connected : " . mysql_error());
+}
+
+// Set the active mySQL database
+$db_selected = mysql_select_db($database, $connection);
+if (!$db_selected) {
+  die ("Can\'t use db : " . mysql_error());
+}
+
+// Search the rows in the markers table
+$query = sprintf("WITH calcs AS(SELECT fmid, marketname, 69* DEGREES(ACOS(COS(RADIANS(latpoint))* COS(RADIANS(latitude)) * COS(RADIANS(longpoint) - RADIANS(longitude))+ SIN(RADIANS(latpoint))  * SIN(RADIANS(latitude))))
+ AS distance_in_miles FROM farmmarkets) SELECT marketname, distance_in_miles FROM calcs WHERE distance_in_miles < 100 ORDER BY distance_in_miles ASC LIMIT 15",
+  mysql_real_escape_string($center_lat),
+  mysql_real_escape_string($center_lng),
+  mysql_real_escape_string($center_lat),
+  mysql_real_escape_string($radius));
+$result = mysql_query($query);
+
+$result = mysql_query($query);
+if (!$result) {
+  die("Invalid query: " . mysql_error());
+}
+
+header("Content-type: text/xml");
+
+// Iterate through the rows, adding XML nodes for each
+while ($row = @mysql_fetch_assoc($result)){
+  $node = $dom->createElement("marker");
+  $newnode = $parnode->appendChild($node);
+  $newnode->setAttribute("fmid", $row['fmid']);
+    $newnode->setAttribute("marketname", $row['marketname']);
+  $newnode->setAttribute("latitude", $row['latitude']);
+  $newnode->setAttribute("longitude", $row['longitude']);
+  $newnode->setAttribute("distance", $row['distance_in_miles']);
+}
+
+echo $dom->saveXML();
+?>
