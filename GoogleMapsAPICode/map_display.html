@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>Google Maps AJAX + mySQL/PHP Example</title>
+    <script src="http://maps.google.com/maps/api/js?sensor=false"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+	function initialise() {
+    myLatlng = new google.maps.LatLng(54.559323,-3.321304);
+    mapOptions = {
+        zoom: 5,
+        center: myLatlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+    }
+    geocoder = new google.maps.Geocoder();
+    infoWindow = new google.maps.InfoWindow;
+    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+     
+    xmlUrl = "inc/markers.xml";
+     
+    loadMarkers();
+     
+}
+ 
+google.maps.event.addDomListener(window, 'load', initialise);   
+
+function loadMarkers() {
+    map.markers = map.markers || []
+    downloadUrl(xmlUrl, function(data) {
+        var xml = data.responseXML;
+        markers = xml.documentElement.getElementsByTagName("marker");
+        for (var i = 0; i < markers.length; i++) {
+            var name = markers[i].getAttribute("name");
+            var marker_image = markers[i].getAttribute('markerimage');
+            var id = markers[i].getAttribute("id");
+            var address = markers[i].getAttribute("address1")+"<br />"+markers[i].getAttribute("address2")+"<br />"+markers[i].getAttribute("address3")+"<br />"+markers[i].getAttribute("postcode");
+            var image = {
+              url: marker_image,
+              size: new google.maps.Size(71, 132),
+              origin: new google.maps.Point(0, 0),
+              scaledSize: new google.maps.Size(71, 132)
+            };
+            var point = new google.maps.LatLng(
+                parseFloat(markers[i].getAttribute("lat")),
+                parseFloat(markers[i].getAttribute("lng")));
+            var html = "<div class='infowindow'><b>" + name + "</b> <br/>" + address+'<br/></div>';
+            var marker = new google.maps.Marker({
+              map: map,
+              position: point,
+              icon: image, 
+              title: name
+            });
+            map.markers.push(marker);
+            bindInfoWindow(marker, map, infoWindow, html);
+        }
+    });
+}
+    //]]>
+  </script>
+  </head>
+  <body style="margin:0px; padding:0px;" onload="load()"> 
+   <!-- <div>
+     <input type="text" id="addressInput" size="10"/>
+    <select id="radiusSelect">
+      <option value="25" selected>25mi</option>
+      <option value="100">100mi</option>
+      <option value="200">200mi</option>
+    </select>
+    <input type="button" onclick="searchLocations()" value="Search"/>
+    </div>
+    <div><select id="locationSelect" style="width:100%;visibility:hidden"></select></div>
+	-->
+    <div id="map" style="width: 100%; height: 100%"></div>
+  </body>
+</html>

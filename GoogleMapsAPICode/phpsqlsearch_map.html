@@ -2,9 +2,8 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <title>Google Maps AJAX + mySQL/PHP Example</title>
-    <script src="http://maps.google.com/maps/api/js?sensor=false"
-            type="text/javascript"></script>
+    <title>Map Page</title>
+    <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
     <script type="text/javascript">
     //<![CDATA[
     var map;
@@ -13,22 +12,25 @@
     var locationSelect;
 
     function load() {
-      map = new google.maps.Map(document.getElementById("map"), {
+      console.log('load');
+	  map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(40, -100),
         zoom: 4,
       });
       infoWindow = new google.maps.InfoWindow();
-
+	  
+	  /*
       locationSelect = document.getElementById("locationSelect");
       locationSelect.onchange = function() {
         var markerNum = locationSelect.options[locationSelect.selectedIndex].value;
         if (markerNum != "none"){
           google.maps.event.trigger(markers[markerNum], 'click');
         }
-      };
+      };*/
    }
 
    function searchLocations() {
+	 console.log('searchLocations');
      var address = document.getElementById("addressInput").value;
      var geocoder = new google.maps.Geocoder();
      geocoder.geocode({address: address}, function(results, status) {
@@ -41,6 +43,7 @@
    }
 
    function clearLocations() {
+	 console.log('clearLocations');
      infoWindow.close();
      for (var i = 0; i < markers.length; i++) {
        markers[i].setMap(null);
@@ -54,11 +57,11 @@
      locationSelect.appendChild(option);
    }
 
-   function searchLocationsNear(center) {
-     clearLocations(); 
+   function importXML() {
+     console.log('importXML');
+	 clearLocations(); 
 
-     var radius = document.getElementById('radiusSelect').value;
-     var searchUrl = 'phpsqlsearch_genxml.php?lat=' + center.lat() + '&lng=' + center.lng() + '&radius=' + radius;
+     var searchUrl = 'test.xml';
      downloadUrl(searchUrl, function(data) {
        var xml = parseXml(data);
        var markerNodes = xml.documentElement.getElementsByTagName("marker");
@@ -85,6 +88,7 @@
     }
   
     function createMarker(latlng, name, address) {
+	  console.log('createMarker');
       var html = "<b>" + name + "</b> <br/>" + address;
       var marker = new google.maps.Marker({
         map: map,
@@ -98,6 +102,7 @@
     }
 
     function createOption(name, distance, num) {
+	console.log('createOption');
       var option = document.createElement("option");
       option.value = num;
       option.innerHTML = name + "(" + distance.toFixed(1) + ")";
@@ -105,6 +110,7 @@
     }
 
     function downloadUrl(url, callback) {
+	console.log('downloadUrl');
       var request = window.ActiveXObject ?
           new ActiveXObject('Microsoft.XMLHTTP') :
           new XMLHttpRequest;
@@ -112,7 +118,7 @@
       request.onreadystatechange = function() {
         if (request.readyState == 4) {
           request.onreadystatechange = doNothing;
-          callback(request.responseText, request.status);
+          callback();
         }
       };
 
@@ -121,6 +127,7 @@
     }
 
     function parseXml(str) {
+	console.log('parseXML');
       if (window.ActiveXObject) {
         var doc = new ActiveXObject('Microsoft.XMLDOM');
         doc.loadXML(str);
@@ -131,12 +138,13 @@
     }
 
     function doNothing() {}
-
+     
+	downloadUrl('test.xml',importXML)
     //]]>
   </script>
   </head>
   <body style="margin:0px; padding:0px;" onload="load()"> 
-    <div>
+    <!--<div>
      <input type="text" id="addressInput" size="10"/>
     <select id="radiusSelect">
       <option value="25" selected>25mi</option>
@@ -144,8 +152,7 @@
       <option value="200">200mi</option>
     </select>
     <input type="button" onclick="searchLocations()" value="Search"/>
-    </div>
-    <div><select id="locationSelect" style="width:100%;visibility:hidden"></select></div>
-    <div id="map" style="width: 100%; height: 80%"></div>
+    </div>-->
+    <div id="map" style="width: 100%; height: 100%"></div>
   </body>
 </html>
