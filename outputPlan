@@ -7,7 +7,7 @@ include("queryPlan.php");
 
 
 
-$result =('SELECT * FROM farmmarkets');
+$result =('SELECT marketname,fmid,latitude,longitude,website FROM farmmarkets');
 
 // Start XML file, create parent node
 $dom = new DOMDocument("1.0");
@@ -24,7 +24,7 @@ while ($row = pg_fetch_result($result)){
   $newnode->setAttribute("marketname", $row['marketname']);
   $newnode->setAttribute("latitude", $row['latitude']);
   $newnode->setAttribute("longitude", $row['longitude']);
-  $newnode->setAttribute("distance", $row['distance_in_miles']);
+  $newnode->setAttribute("website", $row['website']);
 }
 echo $dom->saveXML();
 ?>
