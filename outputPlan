@@ -1,0 +1,30 @@
+<?php
+
+//SELECT query_to_xml('SELECT * FROM farmmarkets', true, false, '');
+
+include("queryPlan.php");
+//include ("latlong.php");
+
+
+
+$result =('SELECT * FROM farmmarkets');
+
+// Start XML file, create parent node
+$dom = new DOMDocument("1.0");
+$node = $dom->createElement("markers");
+$parnode = $dom->appendChild($node);
+
+header("Content-type: text/xml");
+
+// Iterate through the rows, adding XML nodes for each
+while ($row = pg_fetch_result($result)){
+  $node = $dom->createElement("marker");
+  $newnode = $parnode->appendChild($node);
+  $newnode->setAttribute("fmid", $row['fmid']);
+  $newnode->setAttribute("marketname", $row['marketname']);
+  $newnode->setAttribute("latitude", $row['latitude']);
+  $newnode->setAttribute("longitude", $row['longitude']);
+  $newnode->setAttribute("distance", $row['distance_in_miles']);
+}
+echo $dom->saveXML();
+?>
