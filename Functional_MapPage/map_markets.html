@@ -14,9 +14,13 @@
 	var infoWindow;
 	
 	function initialize() {
+		//code below is to retrive filename from GET parameter
 		
-		var url = 'test.xml';
-		
+		var url = getParameter('file');
+		if(url == false){
+			url = 'test.xml';
+			console.log('default test file used');
+		}
 		
 		map = new google.maps.Map(document.getElementById("map-canvas"), {
 			center: new google.maps.LatLng(40, -100),
@@ -45,13 +49,8 @@
 			if (xhr.status === 200) {
 				var xmlDoc = xhr.responseXML;
 				console.log(xmlDoc);
-
-
-				//var marker = xmlDoc.getElementsByTagName("markers");
-				//console.log(marker.length);
-
 				var i = 0;
-				var j = 0;
+				//must later be received in XML doc
 				var website = "http://www.google.com";
 				//outputs array of markers
 				var markerNodes = xmlDoc.getElementsByTagName("marker");
@@ -69,20 +68,20 @@
 					createMarker(latlng, name, website);
 					bounds.extend(latlng);
 				}
+				
+				map.fitBounds(bounds);
 			
 			} else {
 				console.error(xhr.statusText);
 			}
 		  }
 		};
+		
 		xhr.onerror = function (e) {
 		  console.error(xhr.statusText);
 		};
+		//send nothing
 		xhr.send(null);
-		
-
-		
-	
 	}
 	
 	function createMarker(latlng, name, website) {
@@ -95,10 +94,11 @@
 			infoWindow.setContent(html);
 			infoWindow.open(map, marker);
 		});
-		
+		//attach market to map
 		markers.push(marker);
 	}
 	
+	//not currently utilized because we don't need to modify any innerHTML elements
 	function createOption(name, distance, fmid) {
 		var option = document.createElement("option");
 		option.value = fmid;
@@ -106,19 +106,32 @@
 		locationSelect.appendChild(option);
 	}
 	
+	//used if we must clear locations between searches
 	function clearLocations() {
-	infoWindow.close();
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
-	markers.length = 0;
+		infoWindow.close();
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(null);
+		}
+		markers.length = 0;
 
-	locationSelect.innerHTML = "";
-	var option = document.createElement("option");
-	option.value = "none";
-	option.innerHTML = "See all results:";
-	locationSelect.appendChild(option);
-	locationSelect.style.visibility = "visible";
+		locationSelect.innerHTML = "";
+		var option = document.createElement("option");
+		option.value = "none";
+		option.innerHTML = "See all results:";
+		locationSelect.appendChild(option);
+		locationSelect.style.visibility = "visible";
+	}
+	
+	function getParameter(theParameter) { 
+		var params = window.location.search.substr(1).split('&');
+
+		for (var i = 0; i < params.length; i++) {
+			var p=params[i].split('=');
+			if (p[0] == theParameter) {
+			return decodeURIComponent(p[1]);
+			}
+		}
+		return false;
 	}
 	
 	//triggers map load when the HTML page has fully loaded
