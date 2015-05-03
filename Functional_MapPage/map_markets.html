@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRfWel5stwSX72mYoLBYhhjMhXEFrAw8I">
+    </script>
+    <script type="text/javascript">
+    //globally define map
+	var map;
+	var markers = [];
+	var infoWindow;
+	
+	function initialize() {
+		
+		var url = 'test.xml';
+		
+		
+		map = new google.maps.Map(document.getElementById("map-canvas"), {
+			center: new google.maps.LatLng(40, -100),
+			zoom: 4,
+			mapTypeId: 'roadmap',
+			mapTypeControlOptions: {style: google.maps.MapTypeControlStyle.DROPDOWN_MENU}
+		});
+		
+		infoWindow = new google.maps.InfoWindow();
+		
+		downloadXML(url);
+		
+		//here is the event that triggers window display on click	
+		google.maps.event.addListener(markers, 'click', function() {
+			infowindow.open(map,marker);
+		});	
+	}
+	
+	function downloadXML(url) {
+		console.log(url);
+		
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.onload = function (e) {
+		  if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				var xmlDoc = xhr.responseXML;
+				console.log(xmlDoc);
+
+
+				//var marker = xmlDoc.getElementsByTagName("markers");
+				//console.log(marker.length);
+
+				var i = 0;
+				var j = 0;
+				var website = "http://www.google.com";
+				//outputs array of markers
+				var markerNodes = xmlDoc.getElementsByTagName("marker");
+				var bounds = new google.maps.LatLngBounds();
+				
+				for (var i = 0; i < markerNodes.length; i++) {
+					var fmid = markerNodes[i].getAttribute("fmid");
+					var name = markerNodes[i].getAttribute("marketname");
+					var distance = parseFloat(markerNodes[i].getAttribute("distance"));
+					var latlng = new google.maps.LatLng(
+					  parseFloat(markerNodes[i].getAttribute("latitude")),
+					  parseFloat(markerNodes[i].getAttribute("longitude")));
+
+					//createOption(name, distance, i);
+					createMarker(latlng, name, website);
+					bounds.extend(latlng);
+				}
+			
+			} else {
+				console.error(xhr.statusText);
+			}
+		  }
+		};
+		xhr.onerror = function (e) {
+		  console.error(xhr.statusText);
+		};
+		xhr.send(null);
+		
+
+		
+	
+	}
+	
+	function createMarker(latlng, name, website) {
+		var html = "<b>" + name + "</b> <br/>" + website;
+		var marker = new google.maps.Marker({
+			map: map,
+			position: latlng
+		});
+		google.maps.event.addListener(marker, 'click', function() {
+			infoWindow.setContent(html);
+			infoWindow.open(map, marker);
+		});
+		
+		markers.push(marker);
+	}
+	
+	function createOption(name, distance, fmid) {
+		var option = document.createElement("option");
+		option.value = fmid;
+		option.innerHTML = fmid + "(" + distance.toFixed(1) + ")";
+		locationSelect.appendChild(option);
+	}
+	
+	function clearLocations() {
+	infoWindow.close();
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+	markers.length = 0;
+
+	locationSelect.innerHTML = "";
+	var option = document.createElement("option");
+	option.value = "none";
+	option.innerHTML = "See all results:";
+	locationSelect.appendChild(option);
+	locationSelect.style.visibility = "visible";
+	}
+	
+	//triggers map load when the HTML page has fully loaded
+	google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+<div id="map-canvas"></div>
+  </body>
+</html>
